@@ -1,3 +1,4 @@
+#include "string_sink.hpp"
 #include <boost/json.hpp>
 #include <boost/capy.hpp>
 #include <boost/capy/test/run_blocking.hpp>
@@ -182,22 +183,18 @@ template<class WriteSink> boost::capy::task<void> serialize( boost::json::value 
     }
 }
 
-struct write_sink
-{
-    std::string r;
-
-    boost::capy::task<void> write( void const* p, std::size_t n )
-    {
-        r.append( static_cast<char const*>( p ), n );
-        co_return;
-    }
-};
-
 } // unnamed namespace
 
-std::string serialize_capy_task_2( boost::json::value const& jv )
+std::string serialize_capy_task_2_imm( boost::json::value const& jv )
 {
-    write_sink ws;
+    immediate_string_sink ws;
     boost::capy::test::run_blocking()( serialize( jv, ws ) );
-    return std::move( ws.r );
+    return std::move( ws.str );
+}
+
+std::string serialize_capy_task_2_def( boost::json::value const& jv )
+{
+    deferred_string_sink ws;
+    boost::capy::test::run_blocking()( serialize( jv, ws ) );
+    return std::move( ws.str );
 }

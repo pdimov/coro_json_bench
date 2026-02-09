@@ -36,12 +36,14 @@ std::string serialize_cobalt_promise_2_imm( boost::json::value const& jv );
 std::string serialize_cobalt_promise_2_def( boost::json::value const& jv );
 std::string serialize_std_generator_cobalt( boost::json::value const& jv );
 std::string serialize_std_generator_capy( boost::json::value const& jv );
-std::string serialize_capy_task( boost::json::value const& jv );
-std::string serialize_capy_task_2( boost::json::value const& jv );
+std::string serialize_capy_task_imm( boost::json::value const& jv );
+std::string serialize_capy_task_def( boost::json::value const& jv );
+std::string serialize_capy_task_2_imm( boost::json::value const& jv );
+std::string serialize_capy_task_2_def( boost::json::value const& jv );
 
 int main()
 {
-	char const* fn = "../develop/libs/json/bench/data/random.json";
+	char const* fn = "../develop/libs/json/bench/data/canada.json";
 
 	std::cout << "Using " << fn << " as input\n\n";
 
@@ -58,8 +60,10 @@ int main()
 	bench( "serialize_cobalt_promise_2_def", serialize_cobalt_promise_2_def, jv );
 	bench( "serialize_std_generator_cobalt", serialize_std_generator_cobalt, jv );
 	bench( "serialize_std_generator_capy", serialize_std_generator_capy, jv );
-	bench( "serialize_capy_task", serialize_capy_task, jv );
-	bench( "serialize_capy_task_2", serialize_capy_task_2, jv );
+	bench( "serialize_capy_task_imm", serialize_capy_task_imm, jv );
+	bench( "serialize_capy_task_def", serialize_capy_task_def, jv );
+	bench( "serialize_capy_task_2_imm", serialize_capy_task_2_imm, jv );
+	bench( "serialize_capy_task_2_def", serialize_capy_task_2_def, jv );
 
 	return boost::report_errors();
 }

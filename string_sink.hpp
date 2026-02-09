@@ -25,6 +25,13 @@ struct immediate_string_sink
             return h;
         }
 
+        // capy IoAwaitable
+        template<class ExecRef, class StopToken>
+        std::coroutine_handle<> await_suspend( std::coroutine_handle<> h, ExecRef const&, StopToken const& ) const noexcept
+        {
+            return h;
+        }
+
         void await_resume() const noexcept
         {
         }
@@ -55,6 +62,13 @@ struct deferred_string_sink
         {
             sink_->str.append( static_cast<char const*>( p_ ), n_ );
             return h;
+        }
+
+        // capy IoAwaitable
+        template<class ExecRef, class StopToken>
+        std::coroutine_handle<> await_suspend( std::coroutine_handle<> h, ExecRef const&, StopToken const& ) const noexcept
+        {
+            return this->await_suspend( h );
         }
 
         void await_resume() const noexcept
