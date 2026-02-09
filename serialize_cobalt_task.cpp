@@ -45,7 +45,7 @@ template<class WriteSink> boost::cobalt::task<void> write( std::uint64_t v, Writ
 template<class WriteSink> boost::cobalt::task<void> write( double v, WriteSink& ws )
 {
     char buffer[ 32 ];
-    auto r = std::to_chars( buffer, buffer + sizeof(buffer), v );
+    auto r = std::to_chars( buffer, buffer + sizeof(buffer), v, std::chars_format::scientific );
     co_await ws.write( buffer, r.ptr - buffer );
 }
 

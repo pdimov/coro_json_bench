@@ -44,7 +44,7 @@ template<class WriteSink> void write( std::uint64_t const& v, WriteSink& ws )
 template<class WriteSink> void write( double const& v, WriteSink& ws )
 {
     char buffer[ 32 ];
-    auto r = std::to_chars( buffer, buffer + sizeof(buffer), v );
+    auto r = std::to_chars( buffer, buffer + sizeof(buffer), v, std::chars_format::scientific );
     ws.write( buffer, r.ptr - buffer );
 }
 

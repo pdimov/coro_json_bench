@@ -49,7 +49,7 @@ std::generator<std::string_view, std::string> write( std::uint64_t v )
 std::generator<std::string_view, std::string> write( double v )
 {
     char buffer[ 32 ];
-    auto r = std::to_chars( buffer, buffer + sizeof(buffer), v );
+    auto r = std::to_chars( buffer, buffer + sizeof(buffer), v, std::chars_format::scientific );
     co_yield std::string_view( buffer, r.ptr - buffer );
 }
 

@@ -36,7 +36,7 @@ std::string serialize_capy_task( boost::json::value const& jv );
 
 int main()
 {
-	char const* fn = "../develop/libs/json/bench/data/random.json";
+	char const* fn = "../develop/libs/json/bench/data/mesh.json";
 
 	std::cout << "Using " << fn << " as input\n\n";
 
