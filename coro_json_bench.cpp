@@ -31,10 +31,11 @@ std::string serialize_sync( boost::json::value const& jv );
 std::string serialize_cobalt_task( boost::json::value const& jv );
 std::string serialize_cobalt_promise( boost::json::value const& jv );
 std::string serialize_std_generator( boost::json::value const& jv );
+std::string serialize_capy_task( boost::json::value const& jv );
 
 int main()
 {
-	char const* fn = "../develop/libs/json/bench/data/numbers.json";
+	char const* fn = "../develop/libs/json/bench/data/random.json";
 
 	std::cout << "Using " << fn << " as input\n\n";
 
@@ -46,6 +47,7 @@ int main()
 	bench( "serialize_cobalt_task", serialize_cobalt_task, jv );
 	bench( "serialize_cobalt_promise", serialize_cobalt_promise, jv );
 	bench( "serialize_std_generator", serialize_std_generator, jv );
+	bench( "serialize_capy_task", serialize_capy_task, jv );
 
 	return boost::report_errors();
 }

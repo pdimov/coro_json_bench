@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="coro_json_bench.cpp" />
+    <ClCompile Include="serialize_capy_task.cpp" />
     <ClCompile Include="serialize_cobalt_promise.cpp" />
     <ClCompile Include="serialize_cobalt_task.cpp" />
     <ClCompile Include="serialize_std_generator.cpp" />
