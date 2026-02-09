@@ -1,3 +1,4 @@
+#include "string_sink.hpp"
 #include <boost/json.hpp>
 #include <boost/cobalt.hpp>
 #include <string>
@@ -98,22 +99,18 @@ template<class WriteSink> boost::cobalt::task<void> serialize( boost::json::valu
     return visit( [&]( auto const& v ){ return write( v, ws ); }, v );
 }
 
-struct write_sink
-{
-    std::string r;
-
-    boost::cobalt::task<void> write( void const* p, std::size_t n )
-    {
-        r.append( static_cast<char const*>( p ), n );
-        co_return;
-    }
-};
-
 } // unnamed namespace
 
-std::string serialize_cobalt_task( boost::json::value const& jv )
+std::string serialize_cobalt_task_imm( boost::json::value const& jv )
 {
-    write_sink ws;
+    immediate_string_sink ws;
     boost::cobalt::run( serialize( jv, ws ) );
-    return std::move( ws.r );
+    return std::move( ws.str );
+}
+
+std::string serialize_cobalt_task_def( boost::json::value const& jv )
+{
+    deferred_string_sink ws;
+    boost::cobalt::run( serialize( jv, ws ) );
+    return std::move( ws.str );
 }

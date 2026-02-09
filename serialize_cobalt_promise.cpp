@@ -1,3 +1,4 @@
+#include "string_sink.hpp"
 #include <boost/json.hpp>
 #include <boost/cobalt.hpp>
 #include <string>
@@ -98,22 +99,11 @@ template<class WriteSink> boost::cobalt::promise<void> serialize( boost::json::v
     return visit( [&]( auto const& v ){ return write( v, ws ); }, v );
 }
 
-struct write_sink
-{
-    std::string r;
-
-    boost::cobalt::promise<void> write( void const* p, std::size_t n )
-    {
-        r.append( static_cast<char const*>( p ), n );
-        co_return;
-    }
-};
-
 } // unnamed namespace
 
-std::string serialize_cobalt_promise( boost::json::value const& jv )
+std::string serialize_cobalt_promise_imm( boost::json::value const& jv )
 {
-    write_sink ws;
+    immediate_string_sink ws;
 
     boost::cobalt::run( []( auto const& jv, auto& ws ) -> boost::cobalt::task<void> {
 
@@ -122,5 +112,19 @@ std::string serialize_cobalt_promise( boost::json::value const& jv )
 
     }( jv, ws ) );
 
-    return std::move( ws.r );
+    return std::move( ws.str );
+}
+
+std::string serialize_cobalt_promise_def( boost::json::value const& jv )
+{
+    deferred_string_sink ws;
+
+    boost::cobalt::run( []( auto const& jv, auto& ws ) -> boost::cobalt::task<void> {
+
+        co_await serialize( jv, ws );
+        co_return;
+
+        }( jv, ws ) );
+
+    return std::move( ws.str );
 }

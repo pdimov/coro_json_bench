@@ -1,3 +1,4 @@
+#include "string_sink.hpp"
 #include <boost/json.hpp>
 #include <boost/cobalt.hpp>
 #include <string>
@@ -40,7 +41,7 @@ template<class WriteSink> auto write( std::uint64_t v, WriteSink& ws, char (&buf
     return ws.write( buffer, r.ptr - buffer );
 }
 
-template<class WriteSink> boost::cobalt::promise<void> write( double v, WriteSink& ws, char (&buffer)[ 32 ] )
+template<class WriteSink> auto write( double v, WriteSink& ws, char (&buffer)[ 32 ] )
 {
     auto r = std::to_chars( buffer, buffer + sizeof(buffer), v, std::chars_format::scientific );
     return ws.write( buffer, r.ptr - buffer );
@@ -53,6 +54,8 @@ template<class WriteSink> boost::cobalt::promise<void> write( std::string_view v
     co_await ws.write( v.data(), v.size() );
     co_await ws.write( "\"", 1 );
 }
+
+template<class WriteSink> boost::cobalt::promise<void> write( boost::json::object const& v, WriteSink& ws, char (&buffer)[ 32 ] );
 
 template<class WriteSink> boost::cobalt::promise<void> write( boost::json::array const& v, WriteSink& ws, char (&buffer)[ 32 ] )
 {
@@ -179,29 +182,30 @@ template<class WriteSink> boost::cobalt::promise<void> serialize( boost::json::v
     }
 }
 
-struct write_sink
-{
-    std::string r;
-
-    boost::cobalt::promise<void> write( void const* p, std::size_t n )
-    {
-        r.append( static_cast<char const*>( p ), n );
-        co_return;
-    }
-};
-
 } // unnamed namespace
 
-std::string serialize_cobalt_promise_2( boost::json::value const& jv )
+std::string serialize_cobalt_promise_2_imm( boost::json::value const& jv )
 {
-    write_sink ws;
+    immediate_string_sink ws;
 
     boost::cobalt::run( []( auto const& jv, auto& ws ) -> boost::cobalt::task<void> {
 
         co_await serialize( jv, ws );
-        co_return;
 
     }( jv, ws ) );
 
-    return std::move( ws.r );
+    return std::move( ws.str );
+}
+
+std::string serialize_cobalt_promise_2_def( boost::json::value const& jv )
+{
+    deferred_string_sink ws;
+
+    boost::cobalt::run( []( auto const& jv, auto& ws ) -> boost::cobalt::task<void> {
+
+        co_await serialize( jv, ws );
+
+        }( jv, ws ) );
+
+    return std::move( ws.str );
 }

@@ -41,7 +41,7 @@ template<class WriteSink> auto write( std::uint64_t v, WriteSink& ws, char (&buf
     return ws.write( buffer, r.ptr - buffer );
 }
 
-template<class WriteSink> boost::capy::task<void> write( double v, WriteSink& ws, char (&buffer)[ 32 ] )
+template<class WriteSink> auto write( double v, WriteSink& ws, char (&buffer)[ 32 ] )
 {
     auto r = std::to_chars( buffer, buffer + sizeof(buffer), v, std::chars_format::scientific );
     return ws.write( buffer, r.ptr - buffer );
@@ -54,6 +54,8 @@ template<class WriteSink> boost::capy::task<void> write( std::string_view v, Wri
     co_await ws.write( v.data(), v.size() );
     co_await ws.write( "\"", 1 );
 }
+
+template<class WriteSink> boost::capy::task<void> write( boost::json::object const& v, WriteSink& ws, char (&buffer)[ 32 ] );
 
 template<class WriteSink> boost::capy::task<void> write( boost::json::array const& v, WriteSink& ws, char (&buffer)[ 32 ] )
 {
