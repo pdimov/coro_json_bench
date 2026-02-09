@@ -86,7 +86,7 @@ std::generator<std::string_view, std::string> write( boost::json::object const& 
         if( !first ) co_yield ",";
         first = false;
 
-        co_yield x.key();
+        co_yield std::ranges::elements_of( write( x.key() ) );
         co_yield ":";
         co_yield std::ranges::elements_of( ::serialize( x.value() ) );
     }
@@ -122,8 +122,6 @@ std::string serialize_std_generator( boost::json::value const& jv )
         {
             co_await ws.write( sv.data(), sv.size() );
         }
-
-        co_return;
 
     }( jv, ws ) );
 
