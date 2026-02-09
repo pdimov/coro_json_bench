@@ -33,5 +33,11 @@
     <ClCompile Include="serialize_capy_task.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="serialize_cobalt_promise_2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="serialize_capy_task_2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

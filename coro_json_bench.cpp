@@ -18,7 +18,7 @@ template<class F> void bench( std::string_view name, F f, boost::json::value con
 
 		std::cout << name << ": " << ( t2 - t1 ) / 1us << " us.\n";
 
-		boost::json::value jv2 = boost::json::parse( r );
+		boost::json::value jv2 = boost::json::parse( r, {}, { .numbers = boost::json::number_precision::precise } );
 		BOOST_TEST( jv2 == jv );
 	}
 	catch( std::exception const& x )
@@ -30,13 +30,15 @@ template<class F> void bench( std::string_view name, F f, boost::json::value con
 std::string serialize_sync( boost::json::value const& jv );
 std::string serialize_cobalt_task( boost::json::value const& jv );
 std::string serialize_cobalt_promise( boost::json::value const& jv );
+std::string serialize_cobalt_promise_2( boost::json::value const& jv );
 std::string serialize_std_generator_cobalt( boost::json::value const& jv );
 std::string serialize_std_generator_capy( boost::json::value const& jv );
 std::string serialize_capy_task( boost::json::value const& jv );
+std::string serialize_capy_task_2( boost::json::value const& jv );
 
 int main()
 {
-	char const* fn = "../develop/libs/json/bench/data/mesh.json";
+	char const* fn = "../develop/libs/json/bench/data/canada.json";
 
 	std::cout << "Using " << fn << " as input\n\n";
 
@@ -47,9 +49,11 @@ int main()
 	bench( "serialize_sync", serialize_sync, jv );
 	bench( "serialize_cobalt_task", serialize_cobalt_task, jv );
 	bench( "serialize_cobalt_promise", serialize_cobalt_promise, jv );
+	bench( "serialize_cobalt_promise_2", serialize_cobalt_promise_2, jv );
 	bench( "serialize_std_generator_cobalt", serialize_std_generator_cobalt, jv );
 	bench( "serialize_std_generator_capy", serialize_std_generator_capy, jv );
 	bench( "serialize_capy_task", serialize_capy_task, jv );
+	bench( "serialize_capy_task_2", serialize_capy_task_2, jv );
 
 	return boost::report_errors();
 }
