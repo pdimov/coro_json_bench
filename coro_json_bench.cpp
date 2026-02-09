@@ -30,7 +30,8 @@ template<class F> void bench( std::string_view name, F f, boost::json::value con
 std::string serialize_sync( boost::json::value const& jv );
 std::string serialize_cobalt_task( boost::json::value const& jv );
 std::string serialize_cobalt_promise( boost::json::value const& jv );
-std::string serialize_std_generator( boost::json::value const& jv );
+std::string serialize_std_generator_cobalt( boost::json::value const& jv );
+std::string serialize_std_generator_capy( boost::json::value const& jv );
 std::string serialize_capy_task( boost::json::value const& jv );
 
 int main()
@@ -46,7 +47,8 @@ int main()
 	bench( "serialize_sync", serialize_sync, jv );
 	bench( "serialize_cobalt_task", serialize_cobalt_task, jv );
 	bench( "serialize_cobalt_promise", serialize_cobalt_promise, jv );
-	bench( "serialize_std_generator", serialize_std_generator, jv );
+	bench( "serialize_std_generator_cobalt", serialize_std_generator_cobalt, jv );
+	bench( "serialize_std_generator_capy", serialize_std_generator_capy, jv );
 	bench( "serialize_capy_task", serialize_capy_task, jv );
 
 	return boost::report_errors();

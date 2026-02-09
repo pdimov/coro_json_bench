@@ -1,9 +1,12 @@
 #include <boost/json.hpp>
 #include <boost/cobalt.hpp>
+#include <boost/capy.hpp>
+#include <boost/capy/test/run_blocking.hpp>
 #include <string>
 #include <generator>
 
-std::string serialize_std_generator( boost::json::value const& jv );
+std::string serialize_std_generator_cobalt( boost::json::value const& jv );
+std::string serialize_std_generator_capy( boost::json::value const& jv );
 
 //
 
@@ -99,7 +102,7 @@ std::generator<std::string_view, std::string> serialize( boost::json::value cons
     return visit( [&]( auto const& v ){ return write( v ); }, v );
 }
 
-struct write_sink
+struct write_sink_cobalt
 {
     std::string r;
 
@@ -110,11 +113,22 @@ struct write_sink
     }
 };
 
+struct write_sink_capy
+{
+    std::string r;
+
+    boost::capy::task<void> write( void const* p, std::size_t n )
+    {
+        r.append( static_cast<char const*>( p ), n );
+        co_return;
+    }
+};
+
 } // unnamed namespace
 
-std::string serialize_std_generator( boost::json::value const& jv )
+std::string serialize_std_generator_cobalt( boost::json::value const& jv )
 {
-    write_sink ws;
+    write_sink_cobalt ws;
 
     boost::cobalt::run( []( auto const& jv, auto& ws ) -> boost::cobalt::task<void> {
 
@@ -124,6 +138,22 @@ std::string serialize_std_generator( boost::json::value const& jv )
         }
 
     }( jv, ws ) );
+
+    return std::move( ws.r );
+}
+
+std::string serialize_std_generator_capy( boost::json::value const& jv )
+{
+    write_sink_capy ws;
+
+    boost::capy::test::run_blocking()( []( auto const& jv, auto& ws ) -> boost::capy::task<void> {
+
+        for( auto const& sv: ::serialize( jv ) )
+        {
+            co_await ws.write( sv.data(), sv.size() );
+        }
+
+        }( jv, ws ) );
 
     return std::move( ws.r );
 }
