@@ -4,8 +4,6 @@
 #include <boost/capy/test/run_blocking.hpp>
 #include <string>
 
-std::string serialize_capy_task_2( boost::json::value const& jv );
-
 //
 
 namespace

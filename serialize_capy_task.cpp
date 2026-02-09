@@ -14,10 +14,6 @@
 
 //
 
-std::string serialize_capy_task( boost::json::value const& jv );
-
-//
-
 namespace
 {
 

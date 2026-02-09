@@ -3,8 +3,6 @@
 #include <boost/cobalt.hpp>
 #include <string>
 
-std::string serialize_cobalt_promise_2( boost::json::value const& jv );
-
 //
 
 namespace
