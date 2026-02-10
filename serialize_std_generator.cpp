@@ -55,11 +55,61 @@ std::generator<std::string_view, std::string> write( double v )
     co_yield std::string_view( buffer, r.ptr - buffer );
 }
 
+static inline char hex_digit( int v )
+{
+    if( v > 9 )
+    {
+        return 'A' + v - 10;
+    }
+    else
+    {
+        return '0' + v;
+    }
+}
+
 std::generator<std::string_view, std::string> write( std::string_view v )
 {
-    // ignore quoting for now
     co_yield "\"";
-    co_yield v;
+
+    for( std::size_t i = 0;; )
+    {
+        std::size_t j = v.find_first_of( "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\"\\", i );
+
+        if( j == std::string_view::npos )
+        {
+            j = v.size();
+        }
+
+        if( j > i )
+        {
+            co_yield v.substr( i, j - i );
+        }
+
+        if( j == v.size() ) break;
+
+        char ch = v[ j ];
+
+        if( ch == '"' )
+        {
+            co_yield "\\\"";
+        }
+        else if( ch == '\\' )
+        {
+            co_yield "\\\\";
+        }
+        else
+        {
+            char buffer[] = "\\u0000";
+
+            buffer[ 4 ] = hex_digit( (unsigned char)ch / 16  );
+            buffer[ 5 ] = hex_digit( (unsigned char)ch % 16  );
+
+            co_yield { buffer, 6 };
+        }
+
+        i = j + 1;
+    }
+
     co_yield "\"";
 }
 

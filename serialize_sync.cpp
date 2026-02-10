@@ -48,11 +48,61 @@ template<class WriteSink> void write( double const& v, WriteSink& ws )
     ws.write( buffer, r.ptr - buffer );
 }
 
+static inline char hex_digit( int v )
+{
+    if( v > 9 )
+    {
+        return 'A' + v - 10;
+    }
+    else
+    {
+        return '0' + v;
+    }
+}
+
 template<class WriteSink> void write( std::string_view v, WriteSink& ws )
 {
-    // ignore quoting for now
     ws.write( "\"", 1 );
-    ws.write( v.data(), v.size() );
+
+    for( std::size_t i = 0;; )
+    {
+        std::size_t j = v.find_first_of( "\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F\"\\", i );
+
+        if( j == std::string_view::npos )
+        {
+            j = v.size();
+        }
+
+        if( j > i )
+        {
+            ws.write( v.data() + i, j - i );
+        }
+
+        if( j == v.size() ) break;
+
+        char ch = v[ j ];
+
+        if( ch == '"' )
+        {
+            ws.write( "\\\"", 2 );
+        }
+        else if( ch == '\\' )
+        {
+            ws.write( "\\\\", 2 );
+        }
+        else
+        {
+            char buffer[] = "\\u0000";
+
+            buffer[ 4 ] = hex_digit( (unsigned char)ch / 16  );
+            buffer[ 5 ] = hex_digit( (unsigned char)ch % 16  );
+
+            ws.write( buffer, 6 );
+        }
+
+        i = j + 1;
+    }
+
     ws.write( "\"", 1 );
 }
 

@@ -60,7 +60,7 @@ std::string serialize_capy_task_2_buf( std::string_view name, boost::json::value
 
 int main()
 {
-	char const* fn = "../develop/libs/json/bench/data/canada.json";
+	char const* fn = "../develop/libs/json/bench/data/gsoc-2018.json";
 
 	std::cout << "Using " << fn << " as input\n\n";
 
