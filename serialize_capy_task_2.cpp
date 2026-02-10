@@ -187,16 +187,9 @@ template<class WriteSink> boost::capy::task<void> serialize( boost::json::value 
 
 } // unnamed namespace
 
-std::string serialize_capy_task_2_imm( std::string_view /*name*/, boost::json::value const& jv )
+std::string serialize_capy_task_2_str( std::string_view /*name*/, boost::json::value const& jv )
 {
-    immediate_string_sink ws;
-    boost::capy::test::run_blocking()( serialize( jv, ws ) );
-    return std::move( ws.str );
-}
-
-std::string serialize_capy_task_2_def( std::string_view /*name*/, boost::json::value const& jv )
-{
-    deferred_string_sink ws;
+    string_sink ws;
     boost::capy::test::run_blocking()( serialize( jv, ws ) );
     return std::move( ws.str );
 }

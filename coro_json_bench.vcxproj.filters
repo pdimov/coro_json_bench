@@ -47,5 +47,8 @@
     <ClInclude Include="buffered_file_sink.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="file_sink.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

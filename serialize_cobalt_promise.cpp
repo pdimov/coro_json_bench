@@ -103,22 +103,9 @@ template<class WriteSink> boost::cobalt::promise<void> serialize( boost::json::v
 
 } // unnamed namespace
 
-std::string serialize_cobalt_promise_imm( std::string_view /*name*/, boost::json::value const& jv )
+std::string serialize_cobalt_promise_str( std::string_view /*name*/, boost::json::value const& jv )
 {
-    immediate_string_sink ws;
-
-    boost::cobalt::run( []( auto const& jv, auto& ws ) -> boost::cobalt::task<void> {
-
-        co_await serialize( jv, ws );
-
-    }( jv, ws ) );
-
-    return std::move( ws.str );
-}
-
-std::string serialize_cobalt_promise_def( std::string_view /*name*/, boost::json::value const& jv )
-{
-    deferred_string_sink ws;
+    string_sink ws;
 
     boost::cobalt::run( []( auto const& jv, auto& ws ) -> boost::cobalt::task<void> {
 
