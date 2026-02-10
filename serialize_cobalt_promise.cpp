@@ -1,5 +1,6 @@
 #include "string_sink.hpp"
 #include "file_sink.hpp"
+#include "buffered_file_sink.hpp"
 #include <boost/json.hpp>
 #include <boost/cobalt.hpp>
 #include <string>
@@ -109,7 +110,6 @@ std::string serialize_cobalt_promise_imm( std::string_view /*name*/, boost::json
     boost::cobalt::run( []( auto const& jv, auto& ws ) -> boost::cobalt::task<void> {
 
         co_await serialize( jv, ws );
-        co_return;
 
     }( jv, ws ) );
 
@@ -123,9 +123,8 @@ std::string serialize_cobalt_promise_def( std::string_view /*name*/, boost::json
     boost::cobalt::run( []( auto const& jv, auto& ws ) -> boost::cobalt::task<void> {
 
         co_await serialize( jv, ws );
-        co_return;
 
-        }( jv, ws ) );
+    }( jv, ws ) );
 
     return std::move( ws.str );
 }
@@ -140,9 +139,27 @@ std::string serialize_cobalt_promise_file( std::string_view name, boost::json::v
     boost::cobalt::run( []( auto const& jv, auto& ws ) -> boost::cobalt::task<void> {
 
         co_await serialize( jv, ws );
-        co_return;
 
-        }( jv, ws ) );
+    }( jv, ws ) );
+
+    _close( fd );
+
+    return std::move( ws.str );
+}
+
+std::string serialize_cobalt_promise_buf( std::string_view name, boost::json::value const& jv )
+{
+    auto fn = std::string( name ) + ".json";
+    int fd = _open( fn.c_str(), _O_CREAT | _O_TRUNC | _O_WRONLY, _S_IREAD | _S_IWRITE );
+
+    buffered_file_sink ws{ fd };
+
+    boost::cobalt::run( []( auto const& jv, auto& ws ) -> boost::cobalt::task<void> {
+
+        co_await serialize( jv, ws );
+        co_await ws.write_eof();
+
+    }( jv, ws ) );
 
     _close( fd );
 

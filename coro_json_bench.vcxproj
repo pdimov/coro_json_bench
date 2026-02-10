@@ -141,6 +141,7 @@
     <ClCompile Include="serialize_sync.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="buffered_file_sink.hpp" />
     <ClInclude Include="string_sink.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

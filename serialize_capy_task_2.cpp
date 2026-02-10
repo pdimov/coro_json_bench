@@ -1,5 +1,6 @@
 #include "string_sink.hpp"
 #include "file_sink.hpp"
+#include "buffered_file_sink.hpp"
 #include <boost/json.hpp>
 #include <boost/capy.hpp>
 #include <boost/capy/test/run_blocking.hpp>
@@ -208,6 +209,25 @@ std::string serialize_capy_task_2_file( std::string_view name, boost::json::valu
     file_sink ws{ fd };
 
     boost::capy::test::run_blocking()( serialize( jv, ws ) );
+
+    _close( fd );
+
+    return std::move( ws.str );
+}
+
+std::string serialize_capy_task_2_buf( std::string_view name, boost::json::value const& jv )
+{
+    auto fn = std::string( name ) + ".json";
+    int fd = _open( fn.c_str(), _O_CREAT | _O_TRUNC | _O_WRONLY, _S_IREAD | _S_IWRITE );
+
+    buffered_file_sink ws{ fd };
+
+    boost::capy::test::run_blocking()( []( auto const& jv, auto& ws ) -> boost::capy::task<void> {
+
+        co_await serialize( jv, ws );
+        co_await ws.write_eof();
+
+        }( jv, ws ) );
 
     _close( fd );
 

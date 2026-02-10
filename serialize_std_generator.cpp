@@ -1,5 +1,6 @@
 #include "string_sink.hpp"
 #include "file_sink.hpp"
+#include "buffered_file_sink.hpp"
 #include <boost/json.hpp>
 #include <boost/cobalt.hpp>
 #include <boost/capy.hpp>
@@ -158,6 +159,29 @@ std::string serialize_std_generator_cobalt_file( std::string_view name, boost::j
     return std::move( ws.str );
 }
 
+std::string serialize_std_generator_cobalt_buf( std::string_view name, boost::json::value const& jv )
+{
+    auto fn = std::string( name ) + ".json";
+    int fd = _open( fn.c_str(), _O_CREAT | _O_TRUNC | _O_WRONLY, _S_IREAD | _S_IWRITE );
+
+    buffered_file_sink ws{ fd };
+
+    boost::cobalt::run( []( auto const& jv, auto& ws ) -> boost::cobalt::task<void> {
+
+        for( auto const& sv: ::serialize( jv ) )
+        {
+            co_await ws.write( sv.data(), sv.size() );
+        }
+
+        co_await ws.write_eof();
+
+    }( jv, ws ) );
+
+    _close( fd );
+
+    return std::move( ws.str );
+}
+
 std::string serialize_std_generator_capy_imm( std::string_view /*name*/, boost::json::value const& jv )
 {
     immediate_string_sink ws;
@@ -203,6 +227,29 @@ std::string serialize_std_generator_capy_file( std::string_view name, boost::jso
         {
             co_await ws.write( sv.data(), sv.size() );
         }
+
+    }( jv, ws ) );
+
+    _close( fd );
+
+    return std::move( ws.str );
+}
+
+std::string serialize_std_generator_capy_buf( std::string_view name, boost::json::value const& jv )
+{
+    auto fn = std::string( name ) + ".json";
+    int fd = _open( fn.c_str(), _O_CREAT | _O_TRUNC | _O_WRONLY, _S_IREAD | _S_IWRITE );
+
+    buffered_file_sink ws{ fd };
+
+    boost::capy::test::run_blocking()( []( auto const& jv, auto& ws ) -> boost::capy::task<void> {
+
+        for( auto const& sv: ::serialize( jv ) )
+        {
+            co_await ws.write( sv.data(), sv.size() );
+        }
+
+        co_await ws.write_eof();
 
     }( jv, ws ) );
 
