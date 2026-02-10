@@ -1,10 +1,13 @@
 #include "string_sink.hpp"
+#include "file_sink.hpp"
 #include <boost/json.hpp>
 #include <boost/cobalt.hpp>
 #include <boost/capy.hpp>
 #include <boost/capy/test/run_blocking.hpp>
 #include <string>
 #include <generator>
+#include <io.h>
+#include <fcntl.h>
 
 //
 
@@ -102,7 +105,7 @@ std::generator<std::string_view, std::string> serialize( boost::json::value cons
 
 } // unnamed namespace
 
-std::string serialize_std_generator_cobalt_imm( boost::json::value const& jv )
+std::string serialize_std_generator_cobalt_imm( std::string_view /*name*/, boost::json::value const& jv )
 {
     immediate_string_sink ws;
 
@@ -118,7 +121,7 @@ std::string serialize_std_generator_cobalt_imm( boost::json::value const& jv )
     return std::move( ws.str );
 }
 
-std::string serialize_std_generator_cobalt_def( boost::json::value const& jv )
+std::string serialize_std_generator_cobalt_def( std::string_view /*name*/, boost::json::value const& jv )
 {
     deferred_string_sink ws;
 
@@ -129,12 +132,33 @@ std::string serialize_std_generator_cobalt_def( boost::json::value const& jv )
             co_await ws.write( sv.data(), sv.size() );
         }
 
-        }( jv, ws ) );
+    }( jv, ws ) );
 
     return std::move( ws.str );
 }
 
-std::string serialize_std_generator_capy_imm( boost::json::value const& jv )
+std::string serialize_std_generator_cobalt_file( std::string_view name, boost::json::value const& jv )
+{
+    auto fn = std::string( name ) + ".json";
+    int fd = _open( fn.c_str(), _O_CREAT | _O_TRUNC | _O_WRONLY, _S_IREAD | _S_IWRITE );
+
+    file_sink ws{ fd };
+
+    boost::cobalt::run( []( auto const& jv, auto& ws ) -> boost::cobalt::task<void> {
+
+        for( auto const& sv: ::serialize( jv ) )
+        {
+            co_await ws.write( sv.data(), sv.size() );
+        }
+
+    }( jv, ws ) );
+
+    _close( fd );
+
+    return std::move( ws.str );
+}
+
+std::string serialize_std_generator_capy_imm( std::string_view /*name*/, boost::json::value const& jv )
 {
     immediate_string_sink ws;
 
@@ -145,12 +169,12 @@ std::string serialize_std_generator_capy_imm( boost::json::value const& jv )
             co_await ws.write( sv.data(), sv.size() );
         }
 
-        }( jv, ws ) );
+    }( jv, ws ) );
 
     return std::move( ws.str );
 }
 
-std::string serialize_std_generator_capy_def( boost::json::value const& jv )
+std::string serialize_std_generator_capy_def( std::string_view /*name*/, boost::json::value const& jv )
 {
     deferred_string_sink ws;
 
@@ -161,7 +185,28 @@ std::string serialize_std_generator_capy_def( boost::json::value const& jv )
             co_await ws.write( sv.data(), sv.size() );
         }
 
-        }( jv, ws ) );
+    }( jv, ws ) );
+
+    return std::move( ws.str );
+}
+
+std::string serialize_std_generator_capy_file( std::string_view name, boost::json::value const& jv )
+{
+    auto fn = std::string( name ) + ".json";
+    int fd = _open( fn.c_str(), _O_CREAT | _O_TRUNC | _O_WRONLY, _S_IREAD | _S_IWRITE );
+
+    file_sink ws{ fd };
+
+    boost::capy::test::run_blocking()( []( auto const& jv, auto& ws ) -> boost::capy::task<void> {
+
+        for( auto const& sv: ::serialize( jv ) )
+        {
+            co_await ws.write( sv.data(), sv.size() );
+        }
+
+    }( jv, ws ) );
+
+    _close( fd );
 
     return std::move( ws.str );
 }

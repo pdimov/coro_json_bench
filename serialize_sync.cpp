@@ -1,7 +1,7 @@
 #include <boost/json.hpp>
 #include <string>
-
-std::string serialize_sync( boost::json::value const& jv );
+#include <io.h>
+#include <fcntl.h>
 
 //
 
@@ -97,21 +97,46 @@ template<class WriteSink> void serialize( boost::json::value const& v, WriteSink
     visit( [&]( auto const& v ){ write( v, ws ); }, v );
 }
 
-struct sync_write_sink
+struct sync_string_sink
 {
-    std::string r;
+    std::string str;
 
     void write( void const* p, std::size_t n )
     {
-        r.append( static_cast<char const*>( p ), n );
+        str.append( static_cast<char const*>( p ), n );
+    }
+};
+
+struct sync_file_sink
+{
+    int fd;
+    std::string str;
+
+    void write( void const* p, std::size_t n )
+    {
+        str.append( static_cast<char const*>( p ), n );
+        _write( fd, p, n );
     }
 };
 
 } // unnamed namespace
 
-std::string serialize_sync( boost::json::value const& jv )
+std::string serialize_sync_str( std::string_view /*name*/, boost::json::value const& jv)
 {
-    sync_write_sink ws;
+    sync_string_sink ws;
     serialize( jv, ws );
-    return std::move( ws.r );
+    return std::move( ws.str );
+}
+
+std::string serialize_sync_file( std::string_view name, boost::json::value const& jv)
+{
+    auto fn = std::string( name ) + ".json";
+    int fd = _open( fn.c_str(), _O_CREAT | _O_TRUNC | _O_WRONLY, _S_IREAD | _S_IWRITE );
+
+    sync_file_sink ws{ fd };
+    serialize( jv, ws );
+
+    _close( fd );
+
+    return std::move( ws.str );
 }

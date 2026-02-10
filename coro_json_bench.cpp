@@ -12,7 +12,7 @@ template<class F> void bench( std::string_view name, F f, boost::json::value con
 	{
 		auto t1 = std::chrono::high_resolution_clock::now();
 
-		std::string r = f( jv );
+		std::string r = f( name, jv );
 
 		auto t2 = std::chrono::high_resolution_clock::now();
 
@@ -27,21 +27,29 @@ template<class F> void bench( std::string_view name, F f, boost::json::value con
 	}
 }
 
-std::string serialize_sync( boost::json::value const& jv );
-std::string serialize_cobalt_task_imm( boost::json::value const& jv );
-std::string serialize_cobalt_task_def( boost::json::value const& jv );
-std::string serialize_cobalt_promise_imm( boost::json::value const& jv );
-std::string serialize_cobalt_promise_def( boost::json::value const& jv );
-std::string serialize_cobalt_promise_2_imm( boost::json::value const& jv );
-std::string serialize_cobalt_promise_2_def( boost::json::value const& jv );
-std::string serialize_std_generator_cobalt_imm( boost::json::value const& jv );
-std::string serialize_std_generator_cobalt_def( boost::json::value const& jv );
-std::string serialize_std_generator_capy_imm( boost::json::value const& jv );
-std::string serialize_std_generator_capy_def( boost::json::value const& jv );
-std::string serialize_capy_task_imm( boost::json::value const& jv );
-std::string serialize_capy_task_def( boost::json::value const& jv );
-std::string serialize_capy_task_2_imm( boost::json::value const& jv );
-std::string serialize_capy_task_2_def( boost::json::value const& jv );
+std::string serialize_sync_str( std::string_view name, boost::json::value const& jv );
+std::string serialize_sync_file( std::string_view name, boost::json::value const& jv );
+std::string serialize_cobalt_task_imm( std::string_view name, boost::json::value const& jv );
+std::string serialize_cobalt_task_def( std::string_view name, boost::json::value const& jv );
+std::string serialize_cobalt_task_file( std::string_view name, boost::json::value const& jv );
+std::string serialize_cobalt_promise_imm( std::string_view name, boost::json::value const& jv );
+std::string serialize_cobalt_promise_def( std::string_view name, boost::json::value const& jv );
+std::string serialize_cobalt_promise_file( std::string_view name, boost::json::value const& jv );
+std::string serialize_cobalt_promise_2_imm( std::string_view name, boost::json::value const& jv );
+std::string serialize_cobalt_promise_2_def( std::string_view name, boost::json::value const& jv );
+std::string serialize_cobalt_promise_2_file( std::string_view name, boost::json::value const& jv );
+std::string serialize_std_generator_cobalt_imm( std::string_view name, boost::json::value const& jv );
+std::string serialize_std_generator_cobalt_def( std::string_view name, boost::json::value const& jv );
+std::string serialize_std_generator_cobalt_file( std::string_view name, boost::json::value const& jv );
+std::string serialize_std_generator_capy_imm( std::string_view name, boost::json::value const& jv );
+std::string serialize_std_generator_capy_def( std::string_view name, boost::json::value const& jv );
+std::string serialize_std_generator_capy_file( std::string_view name, boost::json::value const& jv );
+std::string serialize_capy_task_imm( std::string_view name, boost::json::value const& jv );
+std::string serialize_capy_task_def( std::string_view name, boost::json::value const& jv );
+std::string serialize_capy_task_file( std::string_view name, boost::json::value const& jv );
+std::string serialize_capy_task_2_imm( std::string_view name, boost::json::value const& jv );
+std::string serialize_capy_task_2_def( std::string_view name, boost::json::value const& jv );
+std::string serialize_capy_task_2_file( std::string_view name, boost::json::value const& jv );
 
 int main()
 {
@@ -52,22 +60,47 @@ int main()
 	std::ifstream is( fn );
 	auto jv = boost::json::parse( is );
 
-	bench( "boost::json::serialize", []( auto const& jv ){ return boost::json::serialize( jv ); }, jv );
-	bench( "serialize_sync", serialize_sync, jv );
+	bench( "boost::json::serialize", []( std::string_view /*name*/, auto const& jv ){ return boost::json::serialize( jv ); }, jv );
+	std::cout << std::endl;
+
+	bench( "serialize_sync_str", serialize_sync_str, jv );
+	bench( "serialize_sync_file", serialize_sync_file, jv );
+	std::cout << std::endl;
+
 	bench( "serialize_cobalt_task_imm", serialize_cobalt_task_imm, jv );
 	bench( "serialize_cobalt_task_def", serialize_cobalt_task_def, jv );
+	bench( "serialize_cobalt_task_file", serialize_cobalt_task_file, jv );
+	std::cout << std::endl;
+
 	bench( "serialize_cobalt_promise_imm", serialize_cobalt_promise_imm, jv );
 	bench( "serialize_cobalt_promise_def", serialize_cobalt_promise_def, jv );
+	bench( "serialize_cobalt_promise_file", serialize_cobalt_promise_file, jv );
+	std::cout << std::endl;
+
 	bench( "serialize_cobalt_promise_2_imm", serialize_cobalt_promise_2_imm, jv );
 	bench( "serialize_cobalt_promise_2_def", serialize_cobalt_promise_2_def, jv );
+	bench( "serialize_cobalt_promise_2_file", serialize_cobalt_promise_2_file, jv );
+	std::cout << std::endl;
+
 	bench( "serialize_std_generator_cobalt_imm", serialize_std_generator_cobalt_imm, jv );
 	bench( "serialize_std_generator_cobalt_def", serialize_std_generator_cobalt_def, jv );
+	bench( "serialize_std_generator_cobalt_file", serialize_std_generator_cobalt_file, jv );
+	std::cout << std::endl;
+
 	bench( "serialize_std_generator_capy_imm", serialize_std_generator_capy_imm, jv );
 	bench( "serialize_std_generator_capy_def", serialize_std_generator_capy_def, jv );
+	bench( "serialize_std_generator_capy_file", serialize_std_generator_capy_file, jv );
+	std::cout << std::endl;
+
 	bench( "serialize_capy_task_imm", serialize_capy_task_imm, jv );
 	bench( "serialize_capy_task_def", serialize_capy_task_def, jv );
+	bench( "serialize_capy_task_file", serialize_capy_task_file, jv );
+	std::cout << std::endl;
+
 	bench( "serialize_capy_task_2_imm", serialize_capy_task_2_imm, jv );
 	bench( "serialize_capy_task_2_def", serialize_capy_task_2_def, jv );
+	bench( "serialize_capy_task_2_file", serialize_capy_task_2_file, jv );
+	std::cout << std::endl;
 
 	return boost::report_errors();
 }

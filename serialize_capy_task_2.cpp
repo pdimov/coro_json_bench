@@ -1,8 +1,11 @@
 #include "string_sink.hpp"
+#include "file_sink.hpp"
 #include <boost/json.hpp>
 #include <boost/capy.hpp>
 #include <boost/capy/test/run_blocking.hpp>
 #include <string>
+#include <io.h>
+#include <fcntl.h>
 
 //
 
@@ -11,12 +14,12 @@ namespace
 
 template<class WriteSink> boost::capy::task<void> serialize( boost::json::value const& v, WriteSink& ws );
 
-template<class WriteSink> auto write( std::nullptr_t /*v*/, WriteSink& ws, char (&buffer)[ 32 ])
+template<class WriteSink> auto write( std::nullptr_t /*v*/, WriteSink& ws, char (&/*buffer*/)[32])
 {
     return ws.write( "null", 4 );
 }
 
-template<class WriteSink> auto write( bool v, WriteSink& ws, char (&buffer)[ 32 ] )
+template<class WriteSink> auto write( bool v, WriteSink& ws, char (&/*buffer*/)[32])
 {
     if( v )
     {
@@ -183,16 +186,30 @@ template<class WriteSink> boost::capy::task<void> serialize( boost::json::value 
 
 } // unnamed namespace
 
-std::string serialize_capy_task_2_imm( boost::json::value const& jv )
+std::string serialize_capy_task_2_imm( std::string_view /*name*/, boost::json::value const& jv )
 {
     immediate_string_sink ws;
     boost::capy::test::run_blocking()( serialize( jv, ws ) );
     return std::move( ws.str );
 }
 
-std::string serialize_capy_task_2_def( boost::json::value const& jv )
+std::string serialize_capy_task_2_def( std::string_view /*name*/, boost::json::value const& jv )
 {
     deferred_string_sink ws;
     boost::capy::test::run_blocking()( serialize( jv, ws ) );
+    return std::move( ws.str );
+}
+
+std::string serialize_capy_task_2_file( std::string_view name, boost::json::value const& jv )
+{
+    auto fn = std::string( name ) + ".json";
+    int fd = _open( fn.c_str(), _O_CREAT | _O_TRUNC | _O_WRONLY, _S_IREAD | _S_IWRITE );
+
+    file_sink ws{ fd };
+
+    boost::capy::test::run_blocking()( serialize( jv, ws ) );
+
+    _close( fd );
+
     return std::move( ws.str );
 }

@@ -1,7 +1,10 @@
 #include "string_sink.hpp"
+#include "file_sink.hpp"
 #include <boost/json.hpp>
 #include <boost/cobalt.hpp>
 #include <string>
+#include <io.h>
+#include <fcntl.h>
 
 //
 
@@ -10,12 +13,12 @@ namespace
 
 template<class WriteSink> boost::cobalt::promise<void> serialize( boost::json::value const& v, WriteSink& ws );
 
-template<class WriteSink> auto write( std::nullptr_t /*v*/, WriteSink& ws, char (&buffer)[ 32 ])
+template<class WriteSink> auto write( std::nullptr_t /*v*/, WriteSink& ws, char (&/*buffer*/)[32])
 {
     return ws.write( "null", 4 );
 }
 
-template<class WriteSink> auto write( bool v, WriteSink& ws, char (&buffer)[ 32 ] )
+template<class WriteSink> auto write( bool v, WriteSink& ws, char (&/*buffer*/)[32])
 {
     if( v )
     {
@@ -182,7 +185,7 @@ template<class WriteSink> boost::cobalt::promise<void> serialize( boost::json::v
 
 } // unnamed namespace
 
-std::string serialize_cobalt_promise_2_imm( boost::json::value const& jv )
+std::string serialize_cobalt_promise_2_imm( std::string_view /*name*/, boost::json::value const& jv )
 {
     immediate_string_sink ws;
 
@@ -195,7 +198,7 @@ std::string serialize_cobalt_promise_2_imm( boost::json::value const& jv )
     return std::move( ws.str );
 }
 
-std::string serialize_cobalt_promise_2_def( boost::json::value const& jv )
+std::string serialize_cobalt_promise_2_def( std::string_view /*name*/, boost::json::value const& jv )
 {
     deferred_string_sink ws;
 
@@ -204,6 +207,24 @@ std::string serialize_cobalt_promise_2_def( boost::json::value const& jv )
         co_await serialize( jv, ws );
 
         }( jv, ws ) );
+
+    return std::move( ws.str );
+}
+
+std::string serialize_cobalt_promise_2_file( std::string_view name, boost::json::value const& jv )
+{
+    auto fn = std::string( name ) + ".json";
+    int fd = _open( fn.c_str(), _O_CREAT | _O_TRUNC | _O_WRONLY, _S_IREAD | _S_IWRITE );
+
+    file_sink ws{ fd };
+
+    boost::cobalt::run( []( auto const& jv, auto& ws ) -> boost::cobalt::task<void> {
+
+        co_await serialize( jv, ws );
+
+        }( jv, ws ) );
+
+    _close( fd );
 
     return std::move( ws.str );
 }
