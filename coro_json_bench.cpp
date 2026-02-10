@@ -29,6 +29,7 @@ template<class F> void bench( std::string_view name, F f, boost::json::value con
 
 std::string serialize_sync_str( std::string_view name, boost::json::value const& jv );
 std::string serialize_sync_file( std::string_view name, boost::json::value const& jv );
+std::string serialize_sync_buf( std::string_view name, boost::json::value const& jv );
 
 std::string serialize_cobalt_task_str( std::string_view name, boost::json::value const& jv );
 std::string serialize_cobalt_task_file( std::string_view name, boost::json::value const& jv );
@@ -72,6 +73,7 @@ int main()
 
 	bench( "serialize_sync_str", serialize_sync_str, jv );
 	bench( "serialize_sync_file", serialize_sync_file, jv );
+	bench( "serialize_sync_buf", serialize_sync_buf, jv );
 	std::cout << std::endl;
 
 	bench( "serialize_cobalt_task_str", serialize_cobalt_task_str, jv );

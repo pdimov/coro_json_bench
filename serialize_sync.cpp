@@ -169,6 +169,48 @@ struct sync_file_sink
     }
 };
 
+struct sync_buffered_file_sink
+{
+    int fd;
+    std::string str;
+
+    std::string buffer_;
+
+    static constexpr std::size_t N = 16384; // buffer size
+
+    void write( void const* p, std::size_t n )
+    {
+        if( buffer_.size() + n <= N )
+        {
+            buffer_.append( static_cast<char const*>( p ), n );
+            return;
+        }
+
+        str.append( buffer_ );
+        _write( fd, buffer_.data(), buffer_.size() );
+
+        buffer_.resize( 0 );
+
+        if( n < N )
+        {
+            buffer_.append( static_cast<char const*>( p ), n );
+        }
+        else
+        {
+            str.append( static_cast<char const*>( p ), n );
+            _write( fd, p, n );
+        }
+    }
+
+    void write_eof()
+    {
+        str.append( buffer_ );
+        _write( fd, buffer_.data(), buffer_.size() );
+
+        buffer_.resize( 0 );
+    }
+};
+
 } // unnamed namespace
 
 std::string serialize_sync_str( std::string_view /*name*/, boost::json::value const& jv)
@@ -185,6 +227,21 @@ std::string serialize_sync_file( std::string_view name, boost::json::value const
 
     sync_file_sink ws{ fd };
     serialize( jv, ws );
+
+    _close( fd );
+
+    return std::move( ws.str );
+}
+
+std::string serialize_sync_buf( std::string_view name, boost::json::value const& jv)
+{
+    auto fn = std::string( name ) + ".json";
+    int fd = _open( fn.c_str(), _O_CREAT | _O_TRUNC | _O_WRONLY, _S_IREAD | _S_IWRITE );
+
+    sync_buffered_file_sink ws{ fd };
+    serialize( jv, ws );
+
+    ws.write_eof();
 
     _close( fd );
 
