@@ -213,14 +213,14 @@ struct sync_buffered_file_sink
 
 } // unnamed namespace
 
-std::string serialize_sync_str( std::string_view /*name*/, boost::json::value const& jv)
+std::string serialize_sync_str( std::string_view /*name*/, boost::json::value const& jv )
 {
     sync_string_sink ws;
     serialize( jv, ws );
     return std::move( ws.str );
 }
 
-std::string serialize_sync_file( std::string_view name, boost::json::value const& jv)
+std::string serialize_sync_file( std::string_view name, boost::json::value const& jv )
 {
     auto fn = std::string( name ) + ".json";
     int fd = _open( fn.c_str(), _O_CREAT | _O_TRUNC | _O_WRONLY, _S_IREAD | _S_IWRITE );
@@ -233,7 +233,7 @@ std::string serialize_sync_file( std::string_view name, boost::json::value const
     return std::move( ws.str );
 }
 
-std::string serialize_sync_buf( std::string_view name, boost::json::value const& jv)
+std::string serialize_sync_buf( std::string_view name, boost::json::value const& jv )
 {
     auto fn = std::string( name ) + ".json";
     int fd = _open( fn.c_str(), _O_CREAT | _O_TRUNC | _O_WRONLY, _S_IREAD | _S_IWRITE );

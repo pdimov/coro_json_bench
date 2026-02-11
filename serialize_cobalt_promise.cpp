@@ -1,6 +1,7 @@
 #include "string_sink.hpp"
 #include "file_sink.hpp"
 #include "buffered_file_sink.hpp"
+#include "cobalt_file_sink.hpp"
 #include <boost/json.hpp>
 #include <boost/cobalt.hpp>
 #include <string>
@@ -182,6 +183,26 @@ std::string serialize_cobalt_promise_file( std::string_view name, boost::json::v
     _close( fd );
 
     return std::move( ws.str );
+}
+
+std::string serialize_cobalt_promise_file_async( std::string_view name, boost::json::value const& jv )
+{
+    std::string str;
+
+    boost::cobalt::run( []( std::string_view name, auto const& jv, auto* pstr ) -> boost::cobalt::task<void> {
+
+        auto fn = std::string( name ) + ".json";
+        boost::cobalt::io::stream_file file( fn.c_str(), boost::cobalt::io::file::flags::create | boost::cobalt::io::file::flags::truncate | boost::cobalt::io::file::flags::write_only );
+
+        cobalt_file_sink ws{ std::move( file ) };
+
+        co_await serialize( jv, ws );
+
+        *pstr = std::move( ws.str );
+
+    }( name, jv, &str ) );
+
+    return str;
 }
 
 std::string serialize_cobalt_promise_buf( std::string_view name, boost::json::value const& jv )

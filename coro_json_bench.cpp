@@ -37,6 +37,7 @@ std::string serialize_cobalt_task_buf( std::string_view name, boost::json::value
 
 std::string serialize_cobalt_promise_str( std::string_view name, boost::json::value const& jv );
 std::string serialize_cobalt_promise_file( std::string_view name, boost::json::value const& jv );
+std::string serialize_cobalt_promise_file_async( std::string_view name, boost::json::value const& jv );
 std::string serialize_cobalt_promise_buf( std::string_view name, boost::json::value const& jv );
 
 std::string serialize_cobalt_promise_2_str( std::string_view name, boost::json::value const& jv );
@@ -83,6 +84,7 @@ int main()
 
 	bench( "serialize_cobalt_promise_str", serialize_cobalt_promise_str, jv );
 	bench( "serialize_cobalt_promise_file", serialize_cobalt_promise_file, jv );
+	// bench( "serialize_cobalt_promise_file_async", serialize_cobalt_promise_file_async, jv );
 	bench( "serialize_cobalt_promise_buf", serialize_cobalt_promise_buf, jv );
 	std::cout << std::endl;
 
