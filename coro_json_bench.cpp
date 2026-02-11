@@ -84,7 +84,7 @@ int main()
 
 	bench( "serialize_cobalt_promise_str", serialize_cobalt_promise_str, jv );
 	bench( "serialize_cobalt_promise_file", serialize_cobalt_promise_file, jv );
-	// bench( "serialize_cobalt_promise_file_async", serialize_cobalt_promise_file_async, jv );
+	bench( "serialize_cobalt_promise_file_async", serialize_cobalt_promise_file_async, jv );
 	bench( "serialize_cobalt_promise_buf", serialize_cobalt_promise_buf, jv );
 	std::cout << std::endl;
 

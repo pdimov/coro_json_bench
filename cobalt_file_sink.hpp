@@ -14,6 +14,7 @@ struct cobalt_file_sink
 
     auto write( void const* p, std::size_t n )
     {
+        str.append( static_cast<char const*>( p ), n );
         return boost::cobalt::io::write( file, { { p, n } } );
     }
 };

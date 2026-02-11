@@ -5,6 +5,11 @@
 #include <coroutine>
 #include <io.h>
 
+namespace boost::capy
+{
+    struct io_env;
+};
+
 struct file_sink
 {
     int fd;
@@ -29,8 +34,7 @@ struct file_sink
         }
 
         // capy IoAwaitable
-        template<class ExecRef, class StopToken>
-        std::coroutine_handle<> await_suspend( std::coroutine_handle<> h, ExecRef const&, StopToken const& ) const noexcept
+        std::coroutine_handle<> await_suspend( std::coroutine_handle<> h, boost::capy::io_env const* /*env*/) const noexcept
         {
             return this->await_suspend( h );
         }

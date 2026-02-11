@@ -4,6 +4,11 @@
 #include <string>
 #include <coroutine>
 
+namespace boost::capy
+{
+    struct io_env;
+};
+
 struct string_sink
 {
     std::string str;
@@ -26,8 +31,7 @@ struct string_sink
         }
 
         // capy IoAwaitable
-        template<class ExecRef, class StopToken>
-        std::coroutine_handle<> await_suspend( std::coroutine_handle<> h, ExecRef const&, StopToken const& ) const noexcept
+        std::coroutine_handle<> await_suspend( std::coroutine_handle<> h, boost::capy::io_env const* /*env*/) const noexcept
         {
             return h;
         }
